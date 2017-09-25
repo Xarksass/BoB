@@ -1,0 +1,95 @@
+//
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../../animation/functions";
+@import "../../theme/mixins";
+@import "../../rtl/mixins";
+
+$tab-bar-scroller-indicator-width: 48px;
+
+// postcss-bem-linter: define tab-bar-scroller
+.tab-bar-scroller {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: inherit;
+  overflow: hidden;
+
+  &-scroll-frame {
+    display: flex;
+    position: relative;
+    flex: 1;
+    justify-content: flex-start;
+    overflow: hidden;
+
+    &-tabs {
+      transition: animation-enter(transform, 240ms);
+      will-change: transform;
+    }
+  }
+
+  &-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $tab-bar-scroller-indicator-width;
+    cursor: pointer;
+    visibility: hidden;
+
+    @include theme-prop(color, text-secondary-on-light);
+
+    @include theme-dark(".tab-bar") {
+      @include theme-prop(color, text-secondary-on-dark);
+    }
+
+    &:hover {
+      @include theme-prop(color, text-primary-on-light);
+
+      @include theme-dark(".tab-bar") {
+        @include theme-prop(color, text-primary-on-dark);
+      }
+    }
+
+    &-inner {
+      color: inherit;
+      text-decoration: inherit;
+      cursor: inherit;
+
+      &:focus {
+        outline-color: inherit;
+      }
+
+      @include rtl(".tab-bar-scroller") {
+        transform: rotate(180deg);
+      }
+    }
+
+    &-inner:hover {
+      color: inherit;
+
+      @include theme-dark(".tab-bar") {
+        @include theme-prop(color, text-secondary-on-dark);
+      }
+    }
+  }
+
+  &-indicator-enabled {
+    visibility: visible;
+  }
+}
+
+// postcss-bem-linter: end

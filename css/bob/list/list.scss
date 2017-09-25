@@ -1,0 +1,227 @@
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+@import "../ripple/mixins";
+@import "../rtl/mixins";
+@import "../theme/mixins";
+@import "../typography/mixins";
+@import "../typography/variables";
+
+$list-side-padding: 16px;
+
+// Sets the width and height of a detail element to the specified dimension.
+@mixin list-detail-size_($size) {
+  width: $size;
+  height: $size;
+}
+
+// Sets the width and height of the start detail element, as well as calculates the margins for
+// the start detail element such that the text is always offset by 72px, which is defined within
+// the spec.
+@mixin list-start-detail-size_($size) {
+  $text-offset: 72px;
+  $side-padding: $list-side-padding;
+  $margin-value: $text-offset - $side-padding - $size;
+
+  @include list-detail-size_($size);
+  @include rtl-reflexive-box(margin, right, $margin-value, ".list-item");
+}
+
+// postcss-bem-linter: define list
+
+.list {
+  @include typography(subheading2);
+  @include theme-prop(color, text-primary-on-background);
+
+  @include theme-dark {
+    @include theme-prop(color, text-primary-on-dark);
+  }
+
+  margin: 0;
+  padding: 8px $list-side-padding 0;
+
+  // According to the mocks and stickersheet, the line-height is adjusted to 24px for text content,
+  // same as for subheading1.
+  line-height: map-get(map-get($typo-styles, subheading1), line-height);
+  list-style-type: none;
+}
+
+.list-dense {
+  padding-top: 4px;
+  font-size: .812rem;
+}
+
+// postcss-bem-linter: end
+
+// postcss-bem-linter: define list-item
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 48px;
+
+  &-start-detail {
+    @include list-start-detail-size_(24px);
+  }
+
+  &-end-detail {
+    @include list-detail-size_(24px);
+    @include rtl-reflexive-property(margin, auto, 0, ".list-item");
+  }
+
+  &-text {
+    display: inline-flex;
+    flex-direction: column;
+
+    &-secondary {
+      @include typography(body1);
+      @include theme-prop(color, text-secondary-on-background);
+
+      @include theme-dark {
+        @include theme-prop(color, text-secondary-on-dark);
+      }
+
+      // Match the font size to the primary text when dense
+      // stylelint-disable plugin/selector-bem-pattern
+      .list-dense & {
+        font-size: inherit;
+      }
+      // stylelint-enable plugin/selector-bem-pattern
+    }
+  }
+
+  // stylelint-disable plugin/selector-bem-pattern
+  .list-dense & {
+    height: 40px;
+
+    &-start-detail {
+      @include list-start-detail-size_(20px);
+    }
+
+    &-end-detail {
+      @include list-detail-size_(20px);
+    }
+  }
+
+  .list-avatar-list & {
+    height: 56px;
+
+    &-start-detail {
+      @include list-start-detail-size_(40px);
+
+      border-radius: 50%;
+    }
+  }
+
+  .list-avatar-list.list-dense .list-item {
+    height: 48px;
+
+    &-start-detail {
+      @include list-start-detail-size_(36px);
+    }
+  }
+
+  .list-two-line & {
+    height: 72px;
+  }
+
+  .list-two-line.list-dense & {
+    height: 60px;
+  }
+}
+// postcss-bem-linter: end //
+
+// Override anchor tag styles for the use-case of a list being used for navigation
+// stylelint-disable selector-max-type,selector-no-qualifying-type
+a.list-item {
+  color: inherit;
+  text-decoration: none;
+}
+// stylelint-enable selector-max-type,selector-no-qualifying-type
+
+.list-item.ripple-upgraded {
+  @include ripple-base;
+  @include ripple-bg((pseudo: "::before"));
+  @include ripple-fg((pseudo: "::after"));
+  @include rtl-reflexive-position(left, $list-side-padding * -1);
+
+  position: relative;
+  // Cause the upgraded list item to cover the entirety of the list, causing ripples to emanate
+  // across the entire list element.
+  width: 100%;
+  padding: 0 $list-side-padding;
+  overflow: hidden;
+
+  &:focus {
+    outline: none;
+  }
+
+  @include theme-dark(".list") {
+    @include ripple-bg((pseudo: "::before", base-color: white, opacity: .12));
+    @include ripple-fg((pseudo: "::after", base-color: white, opacity: .12));
+  }
+}
+
+// postcss-bem-linter: define list-divider
+
+.list-divider {
+  height: 0;
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+
+  @include theme-dark(".list") {
+    border-bottom-color: rgba(255, 255, 255, .2);
+  }
+}
+
+.list-divider-inset {
+  $list-divider-inset-amt: /* text offset */ 72px - /* padding offset */ $list-side-padding;
+
+  @include rtl-reflexive-box(margin, left, $list-divider-inset-amt, ".list-group");
+
+  width: calc(100% - #{$list-divider-inset-amt});
+}
+
+// postcss-bem-linter: end
+
+// postcss-bem-linter: define list-group
+
+.list-group {
+  padding: 0 $list-side-padding;
+
+  &-subheader {
+    $list-subheader-virtual-height: 3rem;
+    $list-subheader-leading: map-get(map-get($typo-styles, body2), line-height);
+    $list-subheader-margin:
+      ($list-subheader-virtual-height - $list-subheader-leading) / 2;
+
+    @include typography(body2);
+    @include theme-prop(color, text-primary-on-background);
+
+    @include theme-dark {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    margin: $list-subheader-margin 0;
+  }
+
+  // Reset padding on list since it's already accounted for by the list group.
+  .list {
+    padding: 0;
+  }
+}
+
+// postcss-bem-linter: end

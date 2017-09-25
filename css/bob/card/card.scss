@@ -1,0 +1,188 @@
+//
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../elevation/mixins";
+@import "../theme/mixins";
+@import "../typography/mixins";
+@import "../rtl/mixins";
+
+// postcss-bem-linter: define card
+.card {
+  @include elevation(2);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 2px;
+  overflow: hidden;
+
+  &-primary {
+    padding: 16px;
+
+    // Add extra space before large title.
+    .title-large {
+      padding-top: 8px;
+    }
+
+    // Add extra padding if this is the last block.
+    &:last-child {
+      padding-bottom: 24px;
+    }
+  }
+
+  &-supporting-text {
+    @include typography(body1);
+    @include theme-prop(color, text-primary-on-light);
+
+    box-sizing: border-box;
+    padding: 8px 16px;
+
+    @include theme-dark(".card") {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    // Remove top padding if immediately preceded by a primary block.
+    .card-primary + & {
+      margin-top: -8px;
+      padding-top: 0;
+    }
+
+    // Add extra padding if this is the last block.
+    &:last-child {
+      padding-bottom: 24px;
+    }
+  }
+
+  &-actions {
+    display: flex;
+    box-sizing: border-box;
+    padding: 8px;
+
+    // Adjust text color for dark theme.
+    @include theme-dark(".card") {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    // Tweak button paddings and margins when they're used as actions
+    .card-action {
+      margin: 0 8px 0 0;
+
+      @include rtl {
+        margin: 0 0 0 8px;
+      }
+    }
+
+    .card-action:last-child {
+      @include rtl-reflexive-box(margin, right, 0);
+    }
+
+    // Vertical actions (one per line)
+    &-vertical {
+      flex-flow: column;
+      align-items: flex-start;
+
+      .card-action {
+        margin: 0 0 4px;
+      }
+
+      .card-action:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &-media {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    padding: 16px;
+  }
+
+  &-media-item {
+    display: inline-block;
+    width: auto;
+    height: 80px;
+    margin: 16px 0 0;
+    padding: 0;
+
+    @each $mult, $name in (1.5: "1dot5", 2: "2", 3: "3") {
+      // postcss-bem-linter: ignore
+      &-#{$name}x {
+        width: auto;
+        height: $mult * 80px;
+      }
+    }
+  }
+
+  &-title {
+    @include typography(body2);
+    @include theme-prop(color, text-primary-on-light);
+
+    // Adjust text color for dark theme.
+    @include theme-dark(".card") {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    margin: -.063rem 0; // -1sp 0
+  }
+
+  &-title-large {
+    @include typography(headline);
+
+    margin: 0;
+  }
+
+  &-subtitle {
+    @include typography(body1);
+    @include theme-prop(color, text-primary-on-light);
+
+    // Adjust text color for dark theme.
+    @include theme-dark(".card") {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    margin: -.063rem 0; // -1sp 0
+  }
+
+  &-horizontal-block {
+    @include rtl-reflexive-property(padding, 0, 16px);
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    box-sizing: border-box;
+
+    // postcss-bem-linter: ignore
+    .card-actions-vertical {
+      margin: 16px;
+    }
+
+    .card-media-item {
+      @include rtl-reflexive-box(margin, left, 16px);
+    }
+
+    // postcss-bem-linter: ignore
+    .card-media-item-3x {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+// postcss-bem-linter: end

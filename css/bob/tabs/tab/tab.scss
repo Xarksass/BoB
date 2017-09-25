@@ -1,0 +1,181 @@
+//
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../../animation/functions";
+@import "../../typography/mixins";
+@import "../../theme/mixins";
+@import "../../ripple/mixins";
+@import "../../rtl/mixins";
+
+$tab-with-text-height: 48px;
+$tab-with-icon-and-text-height: 72px;
+
+@mixin tabs-icon-tab-content {
+  display: block;
+  margin: 0 auto;
+}
+
+// postcss-bem-linter: define tab
+.tab {
+  @include typography(body2);
+
+  display: table-cell;
+  position: relative;
+  box-sizing: border-box;
+  min-width: 160px;
+  min-height: $tab-with-text-height;
+  padding: 0 24px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+
+  @include theme-prop(color, text-secondary-on-light);
+
+  &:hover {
+    @include theme-prop(color, text-primary-on-light);
+  }
+
+  &:focus {
+    @include theme-prop(outline-color, text-secondary-on-light);
+  }
+
+  @include theme-dark(".tab-bar") {
+    @include theme-prop(color, text-secondary-on-dark);
+
+    &:hover {
+      @include theme-prop(color, text-primary-on-dark);
+    }
+
+    &:focus {
+      @include theme-prop(outline-color, text-secondary-on-dark);
+    }
+  }
+
+  // TODO: Replace with breakpoint variable
+  @media screen and (max-width: 600px) {
+    min-width: 72px;
+    padding: 0 12px;
+  }
+
+  &-icon {
+    @include tabs-icon-tab-content;
+
+    width: 24px;
+    height: 24px;
+
+    // postcss-bem-linter: ignore
+    .tab-bar-icons-with-text & {
+      margin-top: 4px;
+    }
+  }
+
+  &-icon-text {
+    @include tabs-icon-tab-content;
+  }
+
+  // postcss-bem-linter: ignore
+  &-icon + &-icon-text {
+    padding-top: 6px;
+  }
+}
+
+.tab-active {
+  @include theme-prop(color, text-primary-on-light);
+
+  @include theme-dark(".tab-bar") {
+    @include theme-prop(color, text-primary-on-dark);
+  }
+
+  &::before {
+    bottom: 0;
+  }
+}
+
+// stylelint-disable plugin/selector-bem-pattern
+.tab-bar:not(.tab-bar-upgraded) .tab {
+  position: relative;
+
+  &::after {
+    display: none;
+    position: absolute;
+    top: $tab-with-text-height - 2px;
+    left: 0;
+    width: calc(100% - 4px);
+    height: 2px;
+    content: "";
+    pointer-events: none;
+
+    @include theme-prop(background-color, text-primary-on-light);
+
+    @include theme-dark(".tab-bar", true) {
+      @include theme-prop(background-color, text-primary-on-dark);
+    }
+
+    .toolbar & {
+      @include theme-prop(background-color, text-primary-on-primary);
+    }
+  }
+
+  &-active,
+  &:active,
+  &:hover {
+    &::after {
+      display: block;
+    }
+  }
+
+  &:not(.tab-active):hover::after {
+    opacity: .38;
+  }
+
+  &-active,
+  &:not(.tab-active):active::after {
+    opacity: .87;
+  }
+}
+// stylelint-enable plugin/selector-bem-pattern
+
+// stylelint-disable plugin/selector-bem-pattern
+.tab-bar-icons-with-text:not(.tab-bar-upgraded) .tab::after {
+  top: $tab-with-icon-and-text-height - 2px;
+}
+// stylelint-enable plugin/selector-bem-pattern
+
+.tab.ripple-upgraded {
+  @include ripple-base;
+  @include ripple-fg((pseudo: "::after"));
+  @include ripple-bg((pseudo: "::before"));
+
+  @include theme-dark(".tab-bar") {
+    @include ripple-bg((pseudo: "::before", base-color: map-get($theme-property-values, text-primary-on-dark), opacity: .16));
+    @include ripple-fg((pseudo: "::after", base-color: map-get($theme-property-values, text-primary-on-dark), opacity: .16));
+  }
+
+  .toolbar & {
+    @include ripple-bg((pseudo: "::before", base-color: map-get($theme-property-values, text-primary-on-primary), opacity: .16));
+    @include ripple-fg((pseudo: "::after", base-color: map-get($theme-property-values, text-primary-on-primary), opacity: .16));
+  }
+
+  // stylelint-disable plugin/selector-bem-pattern
+  &:focus {
+    outline: none;
+  }
+  // stylelint-enable plugin/selector-bem-pattern
+}
+// postcss-bem-linter: end

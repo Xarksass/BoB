@@ -1,0 +1,169 @@
+//
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../animation/functions";
+@import "../rtl/mixins";
+@import "../theme/mixins";
+@import "../typography/mixins";
+@import "./variables";
+
+/* postcss-bem-linter: define snackbar */
+.snackbar {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  align-items: center;
+  justify-content: flex-start;
+  padding-right: 24px;
+  padding-left: 24px;
+  transform: translate(-50%, 100%);
+  transition: animation-exit-permanent(transform, .25s);
+  background-color: $snackbar-background-color;
+  pointer-events: none;
+  will-change: transform;
+
+  @include theme-dark(".snackbar") {
+    background-color: $snackbar-background-color-on-dark;
+  }
+
+  @media (max-width: ($snackbar-tablet-breakpoint - 1)) {
+    left: 0;
+    width: calc(100% - 48px);
+    transform: translate(0, 100%);
+  }
+
+  @media (min-width: $snackbar-tablet-breakpoint) {
+    min-width: 288px;
+    max-width: 568px;
+    border-radius: 2px;
+  }
+
+  &-align-start {
+    @media (min-width: $snackbar-tablet-breakpoint) {
+      @include rtl-reflexive-position(left, 24px);
+
+      bottom: 24px;
+      transform: translate(0, 200%);
+    }
+
+    @media (max-width: ($snackbar-tablet-breakpoint - 1)) {
+      bottom: 0;
+      left: 0;
+      width: calc(100% - 48px);
+      transform: translate(0, 100%);
+    }
+  }
+
+  &-active {
+    transform: translate(0);
+    transition: animation-enter(transform, .25s);
+    pointer-events: auto;
+
+    &:not(.snackbar-align-start) {
+      transform: translate(-50%, 0);
+
+      @media (max-width: ($snackbar-tablet-breakpoint - 1)) {
+        bottom: 0;
+        left: 0;
+        width: calc(100% - 48px);
+        transform: translate(0);
+      }
+    }
+  }
+
+  &-action-on-bottom {
+    flex-direction: column;
+  }
+
+  &-action-on-bottom &-text {
+    margin-right: inherit;
+  }
+
+  &-action-on-bottom &-action-wrapper {
+    @include rtl-reflexive-box(margin, left, auto);
+
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-top: -12px;
+    margin-bottom: 8px;
+  }
+
+  &-text {
+    @include typography(body1);
+    @include rtl-reflexive-box(margin, right, auto, ".snackbar");
+
+    display: flex;
+    align-items: center;
+    height: 48px;
+    transition: animation-exit-permanent(opacity, .3s);
+    opacity: 0;
+    color: $snackbar-foreground-color;
+
+    @include theme-dark(".snackbar") {
+      @include theme-prop(color, text-primary-on-light);
+    }
+  }
+
+  &-multiline &-text {
+    height: 80px;
+  }
+
+  /* stylelint-disable plugin/selector-bem-pattern */
+  &-multiline#{&}-action-on-bottom &-text {
+    margin: 0;
+  }
+  /* stylelint-enable plugin/selector-bem-pattern */
+
+  &-action-button {
+    @include typography(button);
+    @include theme-prop(color, secondary);
+
+    @include theme-dark(".snackbar") {
+      @include theme-prop(color, primary);
+    }
+
+    padding: 0;
+    transition: animation-exit-permanent(opacity, .3s);
+    border: none;
+    outline: none;
+    background-color: transparent;
+    opacity: 0;
+    user-select: none;
+    -webkit-appearance: none;
+    visibility: hidden;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &::-moz-focus-inner {
+      border: 0;
+    }
+
+    &:not([aria-hidden]) {
+      visibility: inherit;
+    }
+  }
+
+  &-active &-text,
+  &-active &-action-button:not([aria-hidden]) {
+    transition: animation-exit-permanent(opacity, .3s);
+    opacity: 1;
+  }
+}
+
+/* postcss-bem-linter: end */

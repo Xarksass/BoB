@@ -1,0 +1,193 @@
+//
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../elevation/mixins";
+@import "../ripple/mixins";
+@import "../theme/functions";
+@import "../theme/mixins";
+@import "../typography/mixins";
+@import "./variables";
+
+@mixin btn-filled-accessible($container-fill-color) {
+  $light-or-dark: theme-light-or-dark($container-fill-color);
+
+  @include btn-fill-color($container-fill-color);
+
+  @if ($light-or-dark == "light") {
+    @include btn-ink-color(text-primary-on-dark);
+    @include btn-ripple((base-color: white, opacity: .32));
+  } @else {
+    @include btn-ink-color(text-primary-on-light);
+    @include btn-ripple((base-color: black, opacity: .32));
+  }
+}
+
+@mixin btn-fill-color($color) {
+  // :not(:disabled) is used to support link styled as button
+  // as link does not support :enabled style
+  &:not(:disabled) {
+    @include theme-prop(background-color, $color);
+  }
+}
+
+@mixin btn-stroke-color($color) {
+  &:not(:disabled) {
+    @include theme-prop(border-color, $color);
+  }
+}
+
+@mixin btn-ink-color($color) {
+  &:not(:disabled) {
+    @include theme-prop(color, $color);
+  }
+}
+
+@mixin btn-ripple($ripple-config) {
+  &:not(:disabled) {
+    @include ripple-base;
+    @include ripple-bg(map-merge((pseudo: "::before"), $ripple-config));
+    @include ripple-fg(map-merge((pseudo: "::after"), $ripple-config));
+
+    &:not(.ripple-upgraded) {
+      $tap-highlight-color: rgba(map-get($ripple-config, base-color), map-get($ripple-config, opacity));
+
+      @include theme-prop(-webkit-tap-highlight-color, $tap-highlight-color);
+    }
+  }
+}
+
+@mixin btn-radius($corner-radius) {
+  border-radius: $corner-radius;
+}
+
+@mixin btn-stroke-width($stroke-width) {
+  border-width: $stroke-width;
+  // Note: line height is adjusted for stroke button because borders are not
+  // considered as space available to text on the Web
+  line-height: $btn-height - $stroke-width * 2;
+
+  // postcss-bem-linter: ignore
+  &.btn-dense {
+    // Minus extra 1 to accommodate odd font size of dense button
+    line-height: $dense-button-height - $stroke-width * 2 - 1;
+  }
+}
+
+@mixin button() {
+  @include typography(button);
+
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  min-width: 88px;
+  height: $btn-height;
+  padding: 0 16px;
+  border: none;
+  outline: none;
+  text-align: center;
+  user-select: none;
+  -webkit-appearance: none;
+  overflow: hidden;
+  vertical-align: middle;
+
+  // postcss-bem-linter: ignore
+  &:active {
+    outline: none;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &::-moz-focus-inner {
+    padding: 0;
+    border: 0;
+  }
+
+  &:disabled {
+    @include theme-prop(background-color, transparent);
+    @include theme-prop(color, text-disabled-on-light);
+
+    cursor: default;
+    pointer-events: none;
+
+    @include theme-dark(".btn") {
+      @include theme-prop(color, text-disabled-on-dark);
+    }
+  }
+}
+
+@mixin btn-icon_ {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  font-size: 18px;
+  line-height: inherit;
+  vertical-align: top;
+}
+
+@mixin btn-stroked_() {
+  border-style: solid;
+
+  &:disabled {
+    @include theme-prop(border-color, text-disabled-on-light);
+
+    @include theme-dark(".btn") {
+      @include theme-prop(border-color, text-disabled-on-dark);
+    }
+  }
+}
+
+@mixin btn-filled_() {
+  &:disabled {
+    @include theme-prop(background-color, rgba(black, .12));
+    @include theme-prop(color, text-disabled-on-light);
+
+    @include theme-dark(".btn") {
+      @include theme-prop(background-color, rgba(white, .12));
+      @include theme-prop(color, text-disabled-on-light);
+    }
+  }
+}
+
+@mixin btn-raised_() {
+  @include elevation(2);
+  @include elevation-transition;
+
+  &:hover,
+  &:focus {
+    @include elevation(4);
+  }
+
+  &:active {
+    @include elevation(8);
+  }
+
+  &:disabled {
+    @include elevation(0);
+  }
+}
+
+@mixin btn-compact_() {
+  padding: 0 8px;
+}
+
+@mixin btn-dense_() {
+  height: $dense-button-height;
+  font-size: .8125rem; // 13sp
+  line-height: $dense-button-height;
+}

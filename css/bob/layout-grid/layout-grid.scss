@@ -1,0 +1,130 @@
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+@import "./variables";
+@import "./mixins";
+
+:root {
+  @each $size in map-keys($columns) {
+    --margin-#{$size}: #{map-get($default-margin, $size)};
+    --gutter-#{$size}: #{map-get($default-gutter, $size)};
+    --column-#{$size}: #{map-get($column-width, $size)};
+  }
+}
+
+// postcss-bem-linter: define layout-grid
+.container-fluid {
+  box-sizing: border-box;
+  margin: 0 auto;
+  @each $size in map-keys($columns) {
+    @include media-query_($size) {
+      $margin: map-get($default-margin, $size);
+
+      @include container-fluid($size, $margin, $max-width);
+    }
+  }
+}
+
+.row {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: stretch;
+
+  @supports (display: grid) {
+    display: grid;
+    margin: 0;
+  }
+
+  @each $size in map-keys($columns) {
+    @include media-query_($size) {
+      $margin: map-get($default-margin, $size);
+      $gutter: map-get($default-gutter, $size);
+
+      @include row($size, $margin, $gutter);
+    }
+  }
+}
+
+.col {
+  box-sizing: border-box;
+
+  @supports (display: grid) {
+    margin: 0;
+    width: auto;
+  }
+  // select the upper breakpoint
+  $upper-breakpoint: nth(map-keys($columns), 1);
+
+  @each $size in map-keys($columns) {
+    @include media-query_($size) {
+      $gutter: map-get($default-gutter, $size);
+
+      @include col($size, $default-column-span, $gutter);
+
+      @for $span from 1 through map-get($columns, $upper-breakpoint) {
+        // Span classes.
+        // stylelint-disable max-nesting-depth
+        @at-root .col-#{$span},
+          .col-#{$span}-#{$size} {
+          @include col-span_($size, $span, $gutter);
+        }
+        // stylelint-enable max-nesting-depth
+      }
+    }
+  }
+
+  // Order override classes.
+  @for $i from 1 through map-get($columns, $upper-breakpoint) {
+    &-order-#{$i} {
+      @include col-order($i);
+    }
+  }
+
+  // Alignment classes.
+  &-align-top {
+    @include col-align(top);
+  }
+
+  &-align-middle {
+    @include col-align(middle);
+  }
+
+  &-align-bottom {
+    @include col-align(bottom);
+  }
+}
+
+.container {
+  margin: 0 auto;
+  @each $size in map-keys($columns) {
+    @include media-query_($size) {
+      $margin: map-get($default-margin, $size);
+      $gutter: map-get($default-gutter, $size);
+      $column-width: map-get($column-width, $size);
+
+      @include container($size, $margin, $gutter, $column-width);
+    }
+  }
+}
+
+/*.mdc-layout-grid--align-left {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+.mdc-layout-grid--align-right {
+  margin-right: 0;
+  margin-left: auto;
+} */
+// postcss-bem-linter: end

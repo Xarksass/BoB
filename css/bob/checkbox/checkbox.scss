@@ -1,0 +1,347 @@
+//
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../animation/functions";
+@import "../ripple/mixins";
+@import "../rtl/mixins";
+@import "./variables";
+@import "./keyframes";
+
+@function checkbox-transition-enter($property, $delay: 0ms, $duration: $checkbox-transition-duration) {
+  @return animation-enter($property, $duration, $delay);
+}
+
+@function checkbox-transition-exit($property, $delay: 0ms, $duration: $checkbox-transition-duration) {
+  @return animation-exit-temporary($property, $duration, $delay);
+}
+
+@mixin checkbox-cover-element {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+// postcss-bem-linter: define checkbox
+.checkbox {
+  @include ripple-base;
+  @include ripple-bg((pseudo: "::before", theme-style: primary, opacity: .14));
+  @include ripple-fg((pseudo: "::after", theme-style: primary, opacity: .14));
+
+  display: inline-block;
+  position: relative;
+  flex: 0 0 $checkbox-size;
+  box-sizing: content-box;
+  width: $checkbox-size;
+  height: $checkbox-size;
+  padding: ($checkbox-touch-area - $checkbox-size) / 2;
+  line-height: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  vertical-align: bottom;
+
+  &::before,
+  &::after {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // stylelint-disable plugin/selector-bem-pattern
+  &.ripple-upgraded-unbounded {
+    .checkbox-background::before {
+      content: none;
+    }
+  }
+  // stylelint-enable plugin/selector-bem-pattern
+
+  &-background {
+    @include checkbox-cover-element;
+    @include rtl-reflexive-position(
+      left, ($checkbox-touch-area - $checkbox-size) / 2, ".checkbox");
+
+    display: inline-flex;
+    top: ($checkbox-touch-area - $checkbox-size) / 2;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: $checkbox-ui-pct;
+    height: $checkbox-ui-pct;
+    transition:
+      checkbox-transition-exit(background-color),
+      checkbox-transition-exit(border-color);
+    border: $checkbox-border-width solid $checkbox-border-color;
+    border-radius: 2px;
+    background-color: transparent;
+    pointer-events: none;
+    will-change: background-color, border-color;
+
+    @include theme-dark(".checkbox") {
+      border-color: $checkbox-border-color-dark;
+    }
+
+    // The frame's ::before element is used as a focus indicator for the checkbox
+    &::before {
+      @include checkbox-cover-element;
+      @include theme-prop(background, primary);
+
+      width: 100%;
+      height: 100%;
+      transform: scale(0, 0);
+      transition: checkbox-transition-exit(opacity), checkbox-transition-exit(transform);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      content: "";
+      will-change: opacity, transform;
+    }
+  }
+
+  &-native-control {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  &-checkmark {
+    @include checkbox-cover-element;
+
+    width: 100%;
+    transition: checkbox-transition-exit(opacity, 0ms, $checkbox-transition-duration * 2);
+    fill: $checkbox-mark-color;
+    opacity: 0;
+
+    &-path {
+      transition:
+        checkbox-transition-exit(
+          stroke-dashoffset,
+          0ms,
+          $checkbox-transition-duration * 2
+        );
+      // !important is needed here because a stroke must be set as an attribute on the SVG in order
+      // for line animation to work properly.
+      stroke: $checkbox-mark-color !important;
+      stroke-width: $checkbox-mark-stroke-size * 1.3;
+      stroke-dashoffset: $_checkbox-mark-path-length;
+      stroke-dasharray: $_checkbox-mark-path-length;
+    }
+  }
+
+  &-mixedmark {
+    width: 100%;
+    height: floor($checkbox-mark-stroke-size);
+    transform: scaleX(0) rotate(0deg);
+    transition: checkbox-transition-exit(opacity), checkbox-transition-exit(transform);
+    background-color: $checkbox-mark-color;
+    opacity: 0;
+  }
+}
+
+.checkbox-native-control:focus {
+  ~ .checkbox-background::before {
+    transform: scale(2.75, 2.75);
+    transition:
+      checkbox-transition-enter(opacity, 0ms, 80ms),
+      checkbox-transition-enter(transform, 0ms, 80ms);
+    opacity: .26;
+  }
+}
+
+.checkbox-native-control:checked {
+  ~ .checkbox-background {
+    @include theme-prop(border-color, primary);
+    @include theme-prop(background-color, primary);
+
+    transition:
+      checkbox-transition-enter(border-color),
+      checkbox-transition-enter(background-color);
+
+    .checkbox-checkmark {
+      transition:
+        checkbox-transition-enter(opacity, 0ms, $checkbox-transition-duration * 2),
+        checkbox-transition-enter(transform, 0ms, $checkbox-transition-duration * 2);
+      opacity: 1;
+
+      &-path {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .checkbox-mixedmark {
+      transform: scaleX(1) rotate(-45deg);
+    }
+  }
+}
+
+.checkbox-native-control:indeterminate {
+  ~ .checkbox-background {
+    @include theme-prop(border-color, primary);
+    @include theme-prop(background-color, primary);
+
+    .checkbox-checkmark {
+      transform: rotate(45deg);
+      transition:
+        checkbox-transition-exit(opacity, 0ms, $checkbox-transition-duration),
+        checkbox-transition-exit(transform, 0ms, $checkbox-transition-duration);
+      opacity: 0;
+
+      &-path {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .checkbox-mixedmark {
+      transform: scaleX(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+}
+
+.checkbox-native-control:disabled,
+fieldset:disabled .checkbox-native-control,
+[aria-disabled="true"] .checkbox-native-control {
+  cursor: default;
+
+  // postcss-bem-linter: ignore
+  ~ .checkbox-background {
+    border-color: $checkbox-disabled-color;
+
+    @include theme-dark(".checkbox") {
+      border-color: $checkbox-disabled-color-dark;
+    }
+  }
+
+  &:checked,
+  &:indeterminate {
+    ~ .checkbox-background {
+      border-color: transparent;
+      background-color: $checkbox-disabled-color;
+      // stylelint-disable selector-max-compound-selectors, selector-max-specificity
+      @include theme-dark(".checkbox") {
+        background-color: $checkbox-disabled-color-dark;
+      }
+      // stylelint-enable selector-max-compound-selectors, selector-max-specificity
+    }
+  }
+}
+
+.checkbox--disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.checkbox--upgraded {
+  .checkbox-background,
+  .checkbox-checkmark,
+  .checkbox-checkmark-path,
+  .checkbox-mixedmark {
+    // Due to the myriad of selector combos used to properly style a CSS-only checkbox, all of
+    // which have varying selector precedence and make use of transitions, it is cleaner and more
+    // efficient here to simply use !important, since the checkbox--anim-* classes will take
+    // over from here.
+    transition: none !important;
+  }
+}
+
+.checkbox--anim {
+  $_checkbox-indeterminate-change-duration: 500ms;
+
+  &-unchecked-checked,
+  &-unchecked-indeterminate {
+    .checkbox-background {
+      animation: checkbox-fade-in-background $checkbox-transition-duration * 2 linear;
+
+      @include theme-dark(".checkbox") {
+        animation-name: checkbox-fade-in-background-dark;
+      }
+    }
+  }
+
+  &-checked-unchecked,
+  &-indeterminate-unchecked {
+    .checkbox-background {
+      animation: checkbox-fade-out-background $checkbox-transition-duration * 2 linear;
+
+      @include theme-dark(".checkbox") {
+        animation-name: checkbox-fade-out-background-dark;
+      }
+    }
+  }
+
+  &-unchecked-checked {
+    .checkbox-checkmark-path {
+      // Instead of delaying the animation, we simply multiply its length by 2 and begin the
+      // animation at 50% in order to prevent a flash of styles applied to a checked checkmark
+      // as the background is fading in before the animation begins.
+      animation: $checkbox-transition-duration * 2 linear 0s checkbox-unchecked-checked-checkmark-path;
+      transition: none;
+    }
+  }
+
+  &-unchecked-indeterminate {
+    .checkbox-mixedmark {
+      animation: $checkbox-transition-duration linear 0s checkbox-unchecked-indeterminate-mixedmark;
+      transition: none;
+    }
+  }
+
+  &-checked-unchecked {
+    .checkbox-checkmark-path {
+      animation: $checkbox-transition-duration linear 0s checkbox-checked-unchecked-checkmark-path;
+      transition: none;
+    }
+  }
+
+  &-checked-indeterminate {
+    .checkbox-checkmark {
+      animation: $checkbox-transition-duration linear 0s checkbox-checked-indeterminate-checkmark;
+      transition: none;
+    }
+
+    .checkbox-mixedmark {
+      animation: $checkbox-transition-duration linear 0s checkbox-checked-indeterminate-mixedmark;
+      transition: none;
+    }
+  }
+
+  &-indeterminate-checked {
+    .checkbox-checkmark {
+      animation: $_checkbox-indeterminate-change-duration linear 0s checkbox-indeterminate-checked-checkmark;
+      transition: none;
+    }
+
+    .checkbox-mixedmark {
+      animation: $_checkbox-indeterminate-change-duration linear 0s checkbox-indeterminate-checked-mixedmark;
+      transition: none;
+    }
+  }
+
+  &-indeterminate-unchecked {
+    .checkbox-mixedmark {
+      animation: $_checkbox-indeterminate-change-duration * .6 linear 0s checkbox-indeterminate-unchecked-mixedmark;
+      transition: none;
+    }
+  }
+}
+// postcss-bem-linter: end

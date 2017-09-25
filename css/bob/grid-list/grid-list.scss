@@ -1,0 +1,196 @@
+//
+// Copyright 2017 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../rtl/mixins";
+@import "../theme/mixins";
+@import "../typography/mixins";
+
+$grid-list-tile-width: 200px !default;
+$grid-list-tile-secondary-padding: 16px;
+$grid-list-tile-secondary-padding-narrow: 8px;
+$grid-list-oneline-cap-secondary-height: 48px;
+$grid-list-twoline-cap-secondary-height: 68px;
+$grid-list-tile-secondary-icon-size: 24px;
+
+@mixin grid-list-tile-aspect($width-height-ratio) {
+  .grid-tile-primary {
+    padding-bottom: calc(100% / #{$width-height-ratio});
+  }
+}
+
+@mixin grid-list-tile-gutter($gutter-width) {
+  .grid-tile {
+    margin: $gutter-width/2 0;
+    padding: 0 $gutter-width/2;
+
+    &-secondary {
+      left: $gutter-width/2;
+      width: calc(100% - #{$gutter-width});
+    }
+  }
+
+  .grid-list-tiles {
+    margin: $gutter-width/2 auto;
+  }
+}
+
+// postcss-bem-linter: define grid-list
+.grid-list {
+  @include grid-list-tile-aspect(1);
+  @include grid-list-tile-gutter(4px);
+
+  &-tiles {
+    display: flex;
+    flex-flow: row wrap;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.grid-list-tile-gutter-1 {
+  @include grid-list-tile-gutter(1px);
+}
+
+.grid-list-tile-aspect-16x9 {
+  @include grid-list-tile-aspect(16 / 9);
+}
+
+.grid-list-tile-aspect-3x2 {
+  @include grid-list-tile-aspect(3 / 2);
+}
+
+.grid-list-tile-aspect-2x3 {
+  @include grid-list-tile-aspect(2 / 3);
+}
+
+.grid-list-tile-aspect-4x3 {
+  @include grid-list-tile-aspect(4 / 3);
+}
+
+.grid-list-tile-aspect-3x4 {
+  @include grid-list-tile-aspect(3 / 4);
+}
+
+// stylelint-disable plugin/selector-bem-pattern
+// We need to disable linter here because we are nesting grid-tile under grid list here.
+.grid-list-twoline-caption {
+  .grid-tile-secondary {
+    height: $grid-list-twoline-cap-secondary-height;
+  }
+}
+
+.grid-list-header-caption {
+  .grid-tile-secondary {
+    top: 0;
+    bottom: auto;
+  }
+}
+
+.grid-list-with-icon-align-start {
+  .grid-tile-secondary {
+    @include rtl-reflexive-property(padding, $grid-list-tile-secondary-padding * 2 + $grid-list-tile-secondary-icon-size, $grid-list-tile-secondary-padding-narrow, ".grid-list");
+  }
+
+  .grid-tile-icon {
+    @include rtl-reflexive-position(left, $grid-list-tile-secondary-padding, ".grid-list");
+
+    font-size: $grid-list-tile-secondary-icon-size;
+  }
+}
+
+.grid-list-with-icon-align-end {
+  .grid-tile-secondary {
+    @include rtl-reflexive-property(padding, $grid-list-tile-secondary-padding, $grid-list-tile-secondary-padding * 2 + $grid-list-tile-secondary-icon-size, ".grid-list");
+  }
+
+  .grid-tile-icon {
+    @include rtl-reflexive-position(right, $grid-list-tile-secondary-padding, ".grid-list");
+
+    font-size: $grid-list-tile-secondary-icon-size;
+  }
+}
+// stylelint-enable plugin/selector-bem-pattern
+// postcss-bem-linter: end
+
+// postcss-bem-linter: define grid-tile
+.grid-tile {
+  display: block;
+  position: relative;
+
+  /* @alternate */
+  width: $grid-list-tile-width;
+  width: var(--grid-list-tile-width, $grid-list-tile-width);
+
+  &-primary {
+    @include theme-prop(background-color, background);
+    @include theme-prop(color, text-primary-on-background);
+
+    position: relative;
+    height: 0;
+
+    &-content {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+  }
+
+  &-secondary {
+    @include theme-prop(background-color, primary);
+    @include theme-prop(color, text-primary-on-primary);
+
+    position: absolute;
+    bottom: 0;
+    box-sizing: border-box;
+    height: $grid-list-oneline-cap-secondary-height;
+    padding: $grid-list-tile-secondary-padding;
+  }
+
+  &-title {
+    @include overflow-ellipsis;
+
+    display: block;
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: #{map-get($font-weights, medium)};
+    line-height: 1rem;
+  }
+
+  &-support-text {
+    @include typography(body1);
+    @include overflow-ellipsis;
+
+    display: block;
+    margin: 0;
+    margin-top: 4px;
+    padding: 0;
+  }
+
+  &-icon {
+    position: absolute;
+    top: calc(50% - #{$grid-list-tile-secondary-icon-size} / 2);
+    font-size: 0;
+  }
+}
+// postcss-bem-linter: end

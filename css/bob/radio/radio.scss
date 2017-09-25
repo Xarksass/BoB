@@ -1,0 +1,210 @@
+//
+// Copyright 2016 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+@import "../animation/functions";
+@import "../ripple/mixins";
+@import "../theme/mixins";
+
+$radio-touch-area: 40px;
+$radio-ui-size: 20px;
+$radio-ui-pct: percentage($radio-ui-size / $radio-touch-area);
+$radio-transition-duration: 120ms;
+
+@function radio-enter($name) {
+  @return animation-enter($name, $radio-transition-duration);
+}
+
+@function radio-exit($name) {
+  @return animation-exit-temporary($name, $radio-transition-duration);
+}
+
+// postcss-bem-linter: define radio
+.radio {
+  @include ripple-base;
+  @include ripple-bg((pseudo: "::before", theme-style: primary, opacity: .14));
+  @include ripple-fg((pseudo: "::after", theme-style: primary, opacity: .14));
+
+  display: inline-block;
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: $radio-touch-area;
+  height: $radio-touch-area;
+  padding: ($radio-touch-area - $radio-ui-size) / 2;
+  cursor: pointer;
+  will-change: opacity, transform, border-color, background-color, color;
+
+  &::before,
+  &::after {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // stylelint-disable plugin/selector-bem-pattern
+  &.ripple-upgraded {
+    .radio-background::before {
+      content: none;
+    }
+  }
+  // stylelint-enable plugin/selector-bem-pattern
+
+  // Container for radio circles and ripple.
+  &-background {
+    display: inline-block;
+    position: absolute;
+    left: ($radio-touch-area - $radio-ui-size) / 2;
+    box-sizing: border-box;
+    width: $radio-ui-pct;
+    height: $radio-ui-pct;
+
+    &::before {
+      @include theme-prop(background-color, primary);
+
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: scale(0, 0);
+      transition: radio-exit(opacity), radio-exit(transform);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      content: "";
+    }
+  }
+
+  &-outer-circle {
+    @include theme-prop(border-color, text-secondary-on-light);
+
+    @include theme-dark(".radio") {
+      @include theme-prop(border-color, text-secondary-on-dark);
+    }
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    transition: radio-exit(border-color);
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 50%;
+  }
+
+  &-inner-circle {
+    @include theme-prop(background-color, text-secondary-on-light);
+
+    @include theme-dark(".radio") {
+      @include theme-prop(background-color, text-secondary-on-dark);
+    }
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    transform: scale(0, 0);
+    transition: radio-exit(transform), radio-exit(background-color);
+    border-radius: 50%;
+  }
+
+  &-native-control {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: inherit;
+    z-index: 1;
+  }
+}
+
+.radio-native-control:checked,
+.radio-native-control:disabled {
+  + .radio-background {
+    transition: radio-enter(opacity), radio-enter(transform);
+
+    .radio-outer-circle {
+      transition: radio-enter(border-color);
+    }
+
+    .radio-inner-circle {
+      transition: radio-enter(transform), radio-enter(background-color);
+    }
+  }
+}
+
+.radio-disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.radio-native-control:checked {
+  + .radio-background {
+    .radio-outer-circle {
+      @include theme-prop(border-color, primary);
+    }
+
+    .radio-inner-circle {
+      @include theme-prop(background-color, primary);
+
+      transform: scale(.5);
+      transition: radio-enter(transform), radio-enter(background-color);
+    }
+  }
+}
+
+.radio-native-control:disabled,
+fieldset:disabled .radio-native-control,
+[aria-disabled="true"] .radio-native-control {
+  + .radio-background {
+    cursor: default;
+
+    .radio-outer-circle {
+      border-color: rgba(black, .26);
+
+      @include theme-dark(".radio") {
+        border-color: rgba(white, .3);
+      }
+    }
+
+    .radio-inner-circle {
+      background-color: rgba(black, .26);
+
+      @include theme-dark(".radio") {
+        background-color: rgba(white, .3);
+      }
+    }
+  }
+}
+
+.radio-native-control:focus {
+  + .radio-background::before {
+    transform: scale(2, 2);
+    transition: radio-enter(opacity), radio-enter(transform);
+    opacity: .26;
+  }
+}
+
+// postcss-bem-linter: end
